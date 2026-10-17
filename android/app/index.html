@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Eisfach Android App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
+</head>
+<body>
+<div class="app-container">
+    <div class="app-header">❄️ Eisfach Mobile App</div>
+    <div class="app-body">
+
+        <!-- Login / Server Setup Screen -->
+        <div id="screen-login">
+            <h4 class="mb-3 text-center">Server & Anmelden</h4>
+            <div class="mb-3">
+                <label class="form-label">Server URL</label>
+                <input type="text" id="server-url" class="form-control" value="http://localhost:8000">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Benutzername</label>
+                <input type="text" id="login-user" class="form-control" value="admin">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Passwort</label>
+                <input type="password" id="login-pass" class="form-control" value="admin">
+            </div>
+            <button class="btn btn-primary w-100 py-2" onclick="doLogin()">Verbinden & Anmelden</button>
+            <div id="login-err" class="alert alert-danger mt-3 hidden"></div>
+        </div>
+
+        <!-- Main Menu Screen (App Buttons) -->
+        <div id="screen-menu" class="hidden">
+            <div class="alert alert-light border text-center mb-4">
+                Eingeloggt als: <strong id="lbl-username"></strong>
+            </div>
+            <button class="btn btn-success btn-menu w-100 shadow-sm" onclick="openScannerSection()">
+                📷 Scannen (Input)
+            </button>
+            <button class="btn btn-primary btn-menu w-100 shadow-sm" onclick="openManualSection()">
+                ⌨️ Manuelle Angabe (Input)
+            </button>
+            <button class="btn btn-info btn-menu w-100 shadow-sm text-white" onclick="openInventorySection()">
+                📋 Liste des Bestandes
+            </button>
+            <button class="btn btn-outline-danger w-100 mt-4" onclick="doLogout()">Abmelden</button>
+        </div>
+
+        <!-- Scan Section Screen -->
+        <div id="screen-scan" class="hidden">
+            <button class="btn btn-secondary mb-3 btn-sm" onclick="showScreen('screen-menu'); stopCamera();">⬅️ Zurück</button>
+            <h5 class="mb-3">Kamera Barcode Scanner</h5>
+            <div class="mb-3 text-center">
+                <video id="scanner-video" muted autoplay playsinline></video>
+                <button class="btn btn-outline-primary btn-sm mt-2" onclick="startCamera()">Kamera starten</button>
+                <button class="btn btn-outline-secondary btn-sm mt-2" onclick="stopCamera()">Stoppen</button>
+            </div>
+            <div class="input-group mb-3">
+                <input type="text" id="scanned-code-input" class="form-control" placeholder="Barcode-ID...">
+                <button class="btn btn-primary" onclick="processBarcode()">Prüfen</button>
+            </div>
+            <div id="scan-result-container"></div>
+        </div>
+
+        <!-- Manual Input Section Screen -->
+        <div id="screen-manual" class="hidden">
+            <button class="btn btn-secondary mb-3 btn-sm" onclick="showScreen('screen-menu')">⬅️ Zurück</button>
+            <h5 class="mb-3">Manuelle Barcode-Eingabe</h5>
+            <div class="mb-3">
+                <input type="text" id="manual-code-input" class="form-control form-control-lg" placeholder="Barcode / QR-Code...">
+            </div>
+            <button class="btn btn-primary w-100 py-2" onclick="processManualBarcode()">Barcode Prüfen</button>
+            <div id="manual-result-container" class="mt-3"></div>
+        </div>
+
+        <!-- Inventory List Screen -->
+        <div id="screen-inventory" class="hidden">
+            <button class="btn btn-secondary mb-3 btn-sm" onclick="showScreen('screen-menu')">⬅️ Zurück</button>
+            <h5 class="mb-3">📦 Bestandsliste</h5>
+            <input type="text" id="inv-search" class="form-control mb-3" placeholder="🔍 Suchen..." onkeyup="filterAppInventory()">
+            <div id="inv-list-container"></div>
+        </div>
+
+        <!-- Action / Create / Link Screen -->
+        <div id="screen-action" class="hidden">
+            <button class="btn btn-secondary mb-3 btn-sm" onclick="showScreen('screen-scan')">⬅️ Zurück</button>
+            <div id="action-content-area"></div>
+        </div>
+
+    </div>
+</div>
+
+<script src="app.js"></script>
+<script src="actions.js"></script>
+<script src="app.js"></script>
+<script src="actions.js"></script>
+</body>
+</html>
