@@ -10,7 +10,8 @@ COPY web/ /app/web/
 
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
-COPY homeassistant/addon/run.sh /run.sh
+COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
 CMD ["/run.sh"]
+
