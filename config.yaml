@@ -1,6 +1,6 @@
 name: "Eisfach"
 description: "SQLite-backed Eisfach inventory backend and REST API server for Home Assistant"
-version: "1.0.6"
+version: "1.0.7"
 slug: "eisfach"
 init: false
 arch:
@@ -9,6 +9,10 @@ arch:
   - armhf
   - armv7
   - i386
+ports:
+  8000/tcp: 8000
+ports_description:
+  8000/tcp: "Eisfach Web-UI mit Login"
 map:
   - config:rw
 startup: application

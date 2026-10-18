@@ -26,7 +26,7 @@ Melden Sie sich mit einem Admin-Konto an und öffnen Sie **Admin → Benutzerver
 
 Bei einer frischen eigenständigen Serverinstallation lautet der erste Login `admin` / `admin`. Ändern Sie dieses Standardpasswort in der Benutzerverwaltung, bevor Sie den Server anderen Geräten oder Netzwerken zugänglich machen.
 
-Im Home-Assistant-Add-on wird die Eisfach-eigene Anmeldung deaktiviert. Die Weboberfläche und API sind nur über Home Assistant Ingress aufgerufen; die Add-on-Ports werden nicht direkt auf dem Host veröffentlicht. Der Zugriff wird durch die Home-Assistant-Anmeldung geschützt. Jeder Home-Assistant-Benutzer mit Zugriff auf dieses Ingress erhält in Eisfach Admin-Rechte. Bei einer eigenständigen Serverinstallation bleibt der Eisfach-Login aktiv.
+Im Home-Assistant-Add-on gibt es zwei Zugänge: Port **8000** ist die normale Weboberfläche mit Eisfach-Login und wird direkt auf Host-Port 8000 veröffentlicht. Port **8001** ist nicht als Host-Port veröffentlicht und dient Home Assistant Ingress. Über Ingress erfolgt der Login automatisch; jeder Home-Assistant-Benutzer mit Zugriff auf dieses Ingress erhält in Eisfach Admin-Rechte. Bei einer eigenständigen Serverinstallation bleibt der Eisfach-Login aktiv.
 
 ---
 

@@ -1,17 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from database import get_db
 from models import User
 from schemas import Token, UserCreate, UserResponse, UserUpdate
-from auth import AUTH_DISABLED, verify_password, get_password_hash, create_access_token, get_current_admin, ACCESS_TOKEN_EXPIRE_MINUTES
+from auth import is_ingress_request, verify_password, get_password_hash, create_access_token, get_current_admin, ACCESS_TOKEN_EXPIRE_MINUTES
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 @router.get("/session")
-def get_session(db: Session = Depends(get_db)):
-    if not AUTH_DISABLED:
+def get_session(request: Request, db: Session = Depends(get_db)):
+    if not is_ingress_request(request):
         return {"auth_disabled": False}
 
     admin = db.query(User).filter(User.role == 1).order_by(User.id).first()

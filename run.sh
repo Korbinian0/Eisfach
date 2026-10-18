@@ -8,6 +8,15 @@ if [ ! -f "$DB_PATH" ]; then
 fi
 
 export DATABASE_URL="sqlite:///$DB_PATH"
-export AUTH_DISABLED="true"
 cd /app/backend
-exec uvicorn main:app --host 0.0.0.0 --port 8001
+uvicorn main:app --host 0.0.0.0 --port 8000 &
+server_8000_pid=$!
+uvicorn main:app --host 0.0.0.0 --port 8001 &
+server_8001_pid=$!
+
+shutdown_servers() {
+    kill "$server_8000_pid" "$server_8001_pid" 2>/dev/null || true
+}
+trap shutdown_servers EXIT INT TERM
+
+wait -n "$server_8000_pid" "$server_8001_pid"

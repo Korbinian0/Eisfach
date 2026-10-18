@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
-import os
 from typing import Optional
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -12,10 +11,10 @@ from models import User
 SECRET_KEY = "eisfach-super-secret-key-change-in-production"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 1 week
-AUTH_DISABLED = os.getenv("AUTH_DISABLED", "false").lower() in {"true", "1", "yes"}
+INGRESS_PORT = 8001
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login", auto_error=not AUTH_DISABLED)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login", auto_error=False)
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -33,8 +32,16 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def get_current_user(token: Optional[str] = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    if AUTH_DISABLED:
+def is_ingress_request(request: Request):
+    server = request.scope.get("server")
+    return server is not None and server[1] == INGRESS_PORT
+
+def get_current_user(
+    request: Request,
+    token: Optional[str] = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+):
+    if is_ingress_request(request):
         admin = db.query(User).filter(User.role == 1).order_by(User.id).first()
         if admin is None:
             raise HTTPException(

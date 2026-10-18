@@ -90,7 +90,11 @@ sudo systemctl start eisfach
    https://github.com/Korbinian0/Eisfach
    ```
 4. Nach dem Laden finden Sie das **Eisfach Inventar Server** Add-on im Store, können es installieren und starten.
-5. Öffnen Sie die Oberfläche über **Öffnen / Ingress** in Home Assistant. Im Add-on ist kein separater Eisfach-Login erforderlich; Home Assistant schützt den Zugriff. Die Ports 8000 und 8001 werden nicht direkt auf dem Host freigegeben. Rufen Sie den internen Port 8001 daher nicht direkt über die Server-IP auf. Jeder Home-Assistant-Benutzer mit Zugriff auf das Add-on erhält in Eisfach Admin-Rechte; beschränken Sie den Ingress-Zugriff entsprechend.
+5. Sie können Eisfach auf zwei Arten öffnen:
+   - Über **Öffnen / Ingress** in Home Assistant: automatischer Login über Home Assistant, ohne separates Eisfach-Passwort. Jeder HA-Benutzer mit Zugriff auf dieses Ingress erhält Admin-Rechte.
+   - Direkt unter `http://<home-assistant-ip>:8000`: normale Eisfach-Anmeldung mit Benutzername und Passwort. Dieser Port wird vom Add-on auf Host-Port 8000 veröffentlicht.
+
+   Port 8001 ist ausschließlich für den internen Home-Assistant-Ingress bestimmt und wird nicht direkt auf dem Host veröffentlicht. Rufen Sie ihn nicht direkt über die Server-IP auf.
 
 ### Sensor Integration (via HACS / GitHub)
 1. Fügen Sie dieses Repository (`https://github.com/Korbinian0/Eisfach`) in **HACS** als benutzerdefiniertes Repository (Kategorie: *Integration*) hinzu oder kopieren Sie den Ordner `homeassistant/custom_components/eisfach` nach `/config/custom_components/eisfach`.
