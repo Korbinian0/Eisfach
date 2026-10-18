@@ -7,7 +7,7 @@ Eisfach ist ein modernes, leichtgewichtigenes Lager- und Bestandsverwaltungssyst
 ## 🚀 Features & Architektur
 
 - **Backend:** Python FastAPI mit integrierter **SQLite**-Datenbank (kein separater Datenbank-Dienst wie MariaDB erforderlich). Automatisches Anlegen eines Admin-Benutzers (`admin` / `admin`) beim ersten Start.
-- **Web-Interface:** Modernes HTML5 & JavaScript Dashboard mit Rollenverwaltung (Admin / Normalbenutzer).
+- **Web-Interface:** Modernes HTML5 & JavaScript Dashboard mit Rollenverwaltung (Admin / Normalbenutzer) sowie Admin-Funktionen zum Erstellen, Bearbeiten, Löschen und Zurücksetzen von Benutzerkonten.
 - **Android App (PWA & Native):**
   - **PWA (Web-App):** Offline-fähige Web-App mit JavaScript-Kamera-Scanner (`ZXing`), ohne jegliche Google-Abhängigkeit.
   - **Echte Native Android-App (Kotlin):** Komplettes Android Studio Projekt (`/android/native`) mit nativer Kamera-Barcode-Erkennung (ZXing Android Embedded), REST-API-Kommunikation und vollem Funktionsumfang ohne Google Play Services.

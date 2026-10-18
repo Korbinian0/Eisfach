@@ -1,18 +1,23 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import date, datetime
 from typing import Optional
 
 class UserBase(BaseModel):
-    username: str
-    role: int = 0
+    username: str = Field(min_length=1, max_length=100)
+    role: int = Field(default=0, ge=0, le=1)
 
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(min_length=1)
 
 class UserResponse(UserBase):
     id: int
     class Config:
         from_attributes = True
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    role: Optional[int] = Field(default=None, ge=0, le=1)
+    password: Optional[str] = Field(default=None, min_length=1)
 
 class Token(BaseModel):
     access_token: str
