@@ -16,6 +16,7 @@ Eisfach ist ein modernes, leichtgewichtigenes Lager- und Bestandsverwaltungssyst
   - **Entnahme-Logik:** Wenn Menge = 1, wird das Produkt für 30 Tage versteckt (Soft-Delete mit automatischer Löschung nach 30 Tagen); wenn Menge > 1, wird die Menge um 1 reduziert.
   - **Weiteres Teil:** Erhöht die Menge eines Artikels um 1.
   - **Neuanlage:** Erstellt ein neues Produkt mit automatischer Einlagerung (heutiges Datum), Barcode, Lagerort und einer automatisch generierten **Jahr-Monat-Nummer**-ID (z. B. `2026-10-1`, aufsteigend ab 1).
+  - **Lagerort:** Lagerort kann nachträglich geändert oder beim Erstellen bzw. Ändern über **Benutzerdefiniert** frei eingegeben werden.
   - **Verknüpfung:** Verknüpft neue Barcodes mit bestehenden Produkten.
 - **Home Assistant Add-on:** Komplett gekapseltes Home Assistant Add-on im Repository-Stammverzeichnis, das das FastAPI-Backend und SQLite direkt innerhalb von Home Assistant ausführt.
 - **Home Assistant Integration:** Über HACS installierbare Custom Integration mit anpassbarem Abfrageintervall und einer interaktiven Markdown-Dashboard-Karte.

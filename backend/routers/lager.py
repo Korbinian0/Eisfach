@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from datetime import date, datetime, timedelta
 from database import get_db
 from models import LagerItem, User
-from schemas import LagerItemCreate, LagerItemResponse, LinkBarcodeRequest
+from schemas import LagerItemCreate, LagerItemResponse, LagerOrtUpdate, LinkBarcodeRequest
 from auth import get_current_user
 
 router = APIRouter(prefix="/api/lager", tags=["Lager"])
@@ -74,11 +75,42 @@ def weiteres_teil(item_id: str, db: Session = Depends(get_db), current_user: Use
     db.refresh(item)
     return item
 
+@router.put("/item/{item_id}/location", response_model=LagerItemResponse)
+def update_item_location(
+    item_id: str,
+    location_in: LagerOrtUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    item = db.query(LagerItem).filter(LagerItem.id == item_id, LagerItem.status == 1).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Produkt nicht gefunden")
+
+    lagerort = location_in.lagerort.strip()
+    if not lagerort:
+        raise HTTPException(status_code=422, detail="Lagerort darf nicht leer sein")
+
+    item.lagerort = lagerort
+    db.commit()
+    db.refresh(item)
+    return item
+
 @router.post("/create", response_model=LagerItemResponse)
 def create_lager_item(item_in: LagerItemCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    existing_bc = db.query(LagerItem).filter(LagerItem.barcode == item_in.barcode, LagerItem.status == 1).first()
-    if existing_bc:
+    existing_item = db.query(LagerItem).filter(LagerItem.barcode == item_in.barcode).first()
+    if existing_item and existing_item.status == 1:
         raise HTTPException(status_code=400, detail="Barcode ist bereits vergeben")
+
+    if existing_item:
+        existing_item.lagerort = item_in.lagerort
+        existing_item.name = item_in.name
+        existing_item.menge = item_in.menge
+        existing_item.status = 1
+        existing_item.hidden_date = None
+        db.commit()
+        db.refresh(existing_item)
+        return existing_item
+
     new_id = generate_next_id(db)
     item = LagerItem(
         id=new_id,
@@ -90,7 +122,23 @@ def create_lager_item(item_in: LagerItemCreate, db: Session = Depends(get_db), c
         status=1
     )
     db.add(item)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        existing_item = db.query(LagerItem).filter(LagerItem.barcode == item_in.barcode).first()
+        if existing_item and existing_item.status == 0:
+            existing_item.lagerort = item_in.lagerort
+            existing_item.name = item_in.name
+            existing_item.menge = item_in.menge
+            existing_item.status = 1
+            existing_item.hidden_date = None
+            db.commit()
+            db.refresh(existing_item)
+            return existing_item
+        if existing_item:
+            raise HTTPException(status_code=400, detail="Barcode ist bereits vergeben") from exc
+        raise
     db.refresh(item)
     return item
 

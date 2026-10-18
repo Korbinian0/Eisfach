@@ -2,7 +2,7 @@ let availableLocations = [];
 let users = [];
 async function loadLocations() {
     try {
-        const res = await fetch(apiUrl("api/locations/"), { headers: { "Authorization": `Bearer ${token}` } });
+        const res = await fetch(apiUrl("api/locations/"), { headers: userManagementHeaders() });
         if (res.ok) { availableLocations = await res.json(); renderLocationsAdmin(availableLocations); }
     } catch (e) { console.error(e); }
 }
@@ -17,33 +17,122 @@ function renderLocationsAdmin(locs) {
 async function createLocation() {
     const name = document.getElementById("new-location-input").value.trim();
     if (!name) return;
-    await fetch(apiUrl("api/locations/"), { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify({ name }) });
+    await fetch(apiUrl("api/locations/"), { method: "POST", headers: userManagementHeaders(true), body: JSON.stringify({ name }) });
     loadLocations();
 }
 async function deleteLocation(id) {
-    await fetch(apiUrl(`api/locations/${id}`), { method: "DELETE", headers: { "Authorization": `Bearer ${token}` } });
+    await fetch(apiUrl(`api/locations/${id}`), { method: "DELETE", headers: userManagementHeaders() });
     loadLocations();
 }
 function openCreateModal(barcode) {
-    let opts = availableLocations.map(l => `<option value="${l.name}">${l.name}</option>`).join("");
     document.getElementById("action-modal-content").innerHTML = `<div class="modal-header"><h5>Neues Produkt</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-    <div class="modal-body"><form onsubmit="submitNewProduct(event, '${barcode}')">
-        <div class="mb-3"><label>Barcode</label><input type="text" class="form-control" value="${barcode}" disabled></div>
+    <div class="modal-body"><form id="new-product-form">
+        <div class="mb-3"><label for="new-prod-barcode">Barcode</label><input type="text" id="new-prod-barcode" class="form-control" disabled></div>
         <div class="mb-3"><label>Name</label><input type="text" id="new-prod-name" class="form-control" required></div>
-        <div class="mb-3"><label>Lagerort</label><select id="new-prod-location" class="form-select">${opts}</select></div>
+        <div class="mb-3"><label for="new-prod-location" class="form-label">Lagerort</label><select id="new-prod-location" class="form-select"></select>
+            <button type="button" id="new-prod-custom-toggle" class="btn btn-sm btn-outline-secondary mt-2">Benutzerdefiniert</button>
+            <input type="text" id="new-prod-custom-location" class="form-control mt-2 d-none" maxlength="255" placeholder="Eigenen Lagerort eingeben">
+        </div>
         <div class="mb-3"><label>Menge</label><input type="number" id="new-prod-menge" class="form-control" value="1" min="1"></div>
         <button type="submit" class="btn btn-success w-100">Erstellen</button>
     </form></div>`;
+    document.getElementById("new-prod-barcode").value = barcode;
+    setupLocationSelector("new-prod-location", "new-prod-custom-toggle", "new-prod-custom-location");
+    document.getElementById("new-product-form").addEventListener("submit", event => submitNewProduct(event, barcode));
     new bootstrap.Modal(document.getElementById("actionModal")).show();
 }
+
+function setupLocationSelector(selectId, toggleId, customInputId, selectedLocation = "") {
+    const select = document.getElementById(selectId);
+    const toggle = document.getElementById(toggleId);
+    const customInput = document.getElementById(customInputId);
+    select.replaceChildren();
+    availableLocations.forEach(location => {
+        const option = document.createElement("option");
+        option.value = location.name;
+        option.textContent = location.name;
+        select.append(option);
+    });
+
+    const useCustomInitially = !availableLocations.length ||
+        (selectedLocation && !availableLocations.some(location => location.name === selectedLocation));
+    if (!availableLocations.length) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "Kein gespeicherter Lagerort";
+        select.append(option);
+    }
+    if (useCustomInitially) {
+        customInput.value = selectedLocation || "";
+        customInput.required = true;
+        customInput.classList.remove("d-none");
+        toggle.classList.add("active");
+    } else {
+        select.required = true;
+        if (selectedLocation) select.value = selectedLocation;
+    }
+
+    toggle.addEventListener("click", () => {
+        const useCustom = customInput.classList.contains("d-none");
+        customInput.classList.toggle("d-none", !useCustom);
+        customInput.required = useCustom;
+        select.required = !useCustom;
+        toggle.classList.toggle("active", useCustom);
+        if (useCustom) customInput.focus();
+    });
+}
+
+function getSelectedLocation(selectId, customInputId) {
+    const customInput = document.getElementById(customInputId);
+    return customInput.classList.contains("d-none")
+        ? document.getElementById(selectId).value
+        : customInput.value.trim();
+}
+
 async function submitNewProduct(e, barcode) {
     e.preventDefault();
-    const body = { barcode, name: document.getElementById("new-prod-name").value, lagerort: document.getElementById("new-prod-location").value, menge: parseInt(document.getElementById("new-prod-menge").value) };
-    const res = await fetch(apiUrl("api/lager/create"), { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(body) });
+    const body = { barcode, name: document.getElementById("new-prod-name").value, lagerort: getSelectedLocation("new-prod-location", "new-prod-custom-location"), menge: parseInt(document.getElementById("new-prod-menge").value) };
+    const res = await fetch(apiUrl("api/lager/create"), { method: "POST", headers: userManagementHeaders(true), body: JSON.stringify(body) });
     if (!res.ok) { alert("Fehler"); return; }
     bootstrap.Modal.getInstance(document.getElementById("actionModal")).hide();
     bootstrap.Modal.getInstance(document.getElementById("scanModal")).hide();
     loadInventory();
+}
+
+function openItemLocationModal(itemId) {
+    const item = inventory.find(entry => entry.id === itemId);
+    if (!item) return;
+
+    document.getElementById("action-modal-content").innerHTML = `<div class="modal-header"><h5>Lagerort ändern</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body"><form id="edit-item-location-form">
+        <p id="edit-item-name" class="mb-3"></p>
+        <div class="mb-3"><label for="edit-item-location" class="form-label">Lagerort</label><select id="edit-item-location" class="form-select"></select>
+            <button type="button" id="edit-item-custom-toggle" class="btn btn-sm btn-outline-secondary mt-2">Benutzerdefiniert</button>
+            <input type="text" id="edit-item-custom-location" class="form-control mt-2 d-none" maxlength="255" placeholder="Eigenen Lagerort eingeben">
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Speichern</button>
+    </form></div>`;
+    document.getElementById("edit-item-name").textContent = item.name;
+    setupLocationSelector("edit-item-location", "edit-item-custom-toggle", "edit-item-custom-location", item.lagerort);
+    document.getElementById("edit-item-location-form").addEventListener("submit", event => saveItemLocation(event, item.id));
+    new bootstrap.Modal(document.getElementById("actionModal")).show();
+}
+
+async function saveItemLocation(e, itemId) {
+    e.preventDefault();
+    const lagerort = getSelectedLocation("edit-item-location", "edit-item-custom-location");
+    if (!lagerort) {
+        alert("Bitte einen Lagerort auswählen oder eingeben.");
+        return;
+    }
+    const res = await fetch(apiUrl(`api/lager/item/${itemId}/location`), {
+        method: "PUT",
+        headers: userManagementHeaders(true),
+        body: JSON.stringify({ lagerort })
+    });
+    if (!res.ok) { alert(await getAdminError(res)); return; }
+    bootstrap.Modal.getInstance(document.getElementById("actionModal")).hide();
+    await loadInventory();
 }
 function openLinkModal(barcode) {
     let opts = inventory.map(i => `<option value="${i.id}">${i.name} (${i.id})</option>`).join("");
@@ -58,7 +147,7 @@ function openLinkModal(barcode) {
 async function submitLinkProduct(e, newBarcode) {
     e.preventDefault();
     const body = { existing_id: document.getElementById("link-target-id").value, new_barcode: newBarcode, additional_menge: parseInt(document.getElementById("link-add-menge").value) };
-    const res = await fetch(apiUrl("api/lager/link"), { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(body) });
+    const res = await fetch(apiUrl("api/lager/link"), { method: "POST", headers: userManagementHeaders(true), body: JSON.stringify(body) });
     if (!res.ok) { alert("Fehler"); return; }
     bootstrap.Modal.getInstance(document.getElementById("actionModal")).hide();
     bootstrap.Modal.getInstance(document.getElementById("scanModal")).hide();
@@ -83,7 +172,7 @@ function generateBarcodesForPrint() {
 async function registerUser(e) {
     e.preventDefault();
     const body = { username: document.getElementById("new-username").value.trim(), password: document.getElementById("new-password").value, role: parseInt(document.getElementById("new-role").value, 10) };
-    const res = await fetch(apiUrl("api/auth/register"), { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(body) });
+    const res = await fetch(apiUrl("api/auth/register"), { method: "POST", headers: userManagementHeaders(true), body: JSON.stringify(body) });
     if (!res.ok) { alert(await getAdminError(res)); return; }
     document.getElementById("register-user-form").reset();
     await loadUsers();

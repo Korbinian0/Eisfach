@@ -38,6 +38,9 @@ class LagerItemBase(BaseModel):
 class LagerItemCreate(LagerItemBase):
     pass
 
+class LagerOrtUpdate(BaseModel):
+    lagerort: str = Field(min_length=1, max_length=255)
+
 class LagerItemResponse(LagerItemBase):
     id: str
     einlager_datum: date

@@ -30,6 +30,7 @@ function renderInventory(items) {
                 <td><span class="badge bg-primary fs-6">${item.menge}</span></td>
                 <td>${item.einlager_datum}</td>
                 <td>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="openItemLocationModal('${item.id}')">📍 Lagerort</button>
                     <button class="btn btn-sm btn-outline-danger me-1" onclick="actionEntnahme('${item.id}')">➖ Entnahme</button>
                     <button class="btn btn-sm btn-outline-success" onclick="actionWeiteres('${item.id}')">➕ Weiteres</button>
                 </td>
