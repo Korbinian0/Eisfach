@@ -79,7 +79,7 @@
     <div class="modal fade" id="scanModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
         <div class="modal-header"><h5 class="modal-title">Barcode Scannen / Eingeben</h5><button type="button" class="btn-close" data-bs-dismiss="modal" onclick="stopScanner()"></button></div>
         <div class="modal-body">
-            <div class="mb-3"><div id="scanner-container"><video id="video" muted autoplay playsinline style="width:100%; max-height:250px;"></video></div>
+            <div class="mb-3"><div id="scanner-container"><video id="video" muted autoplay playsinline style="width: 180px; height: 180px; max-height: 180px;"></video></div>
             <button class="btn btn-outline-primary btn-sm mt-2" onclick="startScanner()">Kamera starten</button>
             <button class="btn btn-outline-secondary btn-sm mt-2" onclick="stopScanner()">Kamera stoppen</button></div>
             <div class="input-group mb-3"><input type="text" id="manual-barcode-input" class="form-control" placeholder="Barcode..."><button class="btn btn-primary" onclick="processBarcode()">Prüfen</button></div>
