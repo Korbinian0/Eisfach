@@ -8,5 +8,6 @@ if [ ! -f "$DB_PATH" ]; then
 fi
 
 export DATABASE_URL="sqlite:///$DB_PATH"
-cd /app
-exec uvicorn backend.main:app --host 0.0.0.0 --port 8000
+cd /app/backend
+exec uvicorn main:app --host 0.0.0.0 --port 8000
+

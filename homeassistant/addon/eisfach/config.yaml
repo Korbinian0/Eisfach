@@ -1,6 +1,6 @@
 name: "Eisfach Inventar Server"
 description: "SQLite-backed Eisfach inventory backend and REST API server for Home Assistant"
-version: "1.0.0"
+version: "1.0.2"
 slug: "eisfach"
 init: false
 arch:
@@ -18,4 +18,3 @@ map:
 startup: application
 boot: auto
 url: "https://github.com/Korbinian0/Eisfach"
-
