@@ -89,8 +89,14 @@ async function registerUser(e) {
     await loadUsers();
 }
 
+function userManagementHeaders(json = false) {
+    const headers = json ? { "Content-Type": "application/json" } : {};
+    if (token) headers.Authorization = "Bearer " + token;
+    return headers;
+}
+
 async function loadUsers() {
-    const res = await fetch(apiUrl("api/auth/users"), { headers: { "Authorization": `****** } });
+    const res = await fetch(apiUrl("api/auth/users"), { headers: userManagementHeaders() });
     if (!res.ok) { alert(await getAdminError(res)); return; }
     users = await res.json();
     renderUsersAdmin();
@@ -143,9 +149,9 @@ async function updateUser(e) {
     };
     const password = document.getElementById("edit-password").value;
     if (password) body.password = password;
-    const res = await fetch(apiUrl(`api/auth/users/${id}`), {
+    const res = await fetch(apiUrl("api/auth/users/" + id), {
         method: "PUT",
-        headers: { "Content-Type": "application/json", "Authorization": `****** },
+        headers: userManagementHeaders(true),
         body: JSON.stringify(body)
     });
     if (!res.ok) { alert(await getAdminError(res)); return; }
@@ -154,10 +160,10 @@ async function updateUser(e) {
 }
 
 async function deleteUser(userId, username) {
-    if (!confirm(`Benutzer "${username}" wirklich löschen?`)) return;
-    const res = await fetch(apiUrl(`api/auth/users/${userId}`), {
+    if (!confirm("Benutzer \"" + username + "\" wirklich löschen?")) return;
+    const res = await fetch(apiUrl("api/auth/users/" + userId), {
         method: "DELETE",
-        headers: { "Authorization": `****** }
+        headers: userManagementHeaders()
     });
     if (!res.ok) { alert(await getAdminError(res)); return; }
     await loadUsers();
