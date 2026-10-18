@@ -1,19 +1,51 @@
 let codeReader = null;
+let scannerControls = null;
+let scannerStartId = 0;
+
+document.getElementById("scanModal").addEventListener("shown.bs.modal", startScanner);
+document.getElementById("scanModal").addEventListener("hidden.bs.modal", () => {
+    stopScanner();
+    document.getElementById("manual-barcode-input").value = "";
+    document.getElementById("scan-result-area").replaceChildren();
+});
 
 function startScanner() {
+    if (scannerControls) return;
+    const startId = ++scannerStartId;
+    const resultArea = document.getElementById("scan-result-area");
+    if (!navigator.mediaDevices?.getUserMedia) {
+        resultArea.innerHTML = `<div class="alert alert-warning">Kamerazugriff ist nicht verfügbar. Öffne Eisfach über HTTPS oder localhost und erlaube den Kamerazugriff.</div>`;
+        return;
+    }
+
     if (!codeReader) {
         codeReader = new ZXing.BrowserBarcodeReader();
     }
-    codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
+    codeReader.decodeFromVideoDevice(null, "video", (result, err) => {
         if (result) {
             document.getElementById("manual-barcode-input").value = result.text;
             processBarcode();
             stopScanner();
         }
-    }).catch(err => console.error("Kamera-Fehler:", err));
+    }).then(controls => {
+        if (startId !== scannerStartId || !document.getElementById("scanModal").classList.contains("show")) {
+            controls.stop();
+            return;
+        }
+        scannerControls = controls;
+    }).catch(err => {
+        if (startId !== scannerStartId) return;
+        console.error("Kamera-Fehler:", err);
+        resultArea.innerHTML = `<div class="alert alert-danger">Kamera konnte nicht gestartet werden. Bitte erlaube den Kamerazugriff und versuche es erneut.</div>`;
+    });
 }
 
 function stopScanner() {
+    scannerStartId++;
+    if (scannerControls) {
+        scannerControls.stop();
+        scannerControls = null;
+    }
     if (codeReader) {
         codeReader.reset();
     }
