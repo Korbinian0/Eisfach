@@ -5,40 +5,29 @@ let authenticationDisabled = false;
 
 function apiUrl(path) {
     const pathname = window.location.pathname;
-    const basePath = pathname.startsWith("/api/hassio_ingress/")
-        ? `${pathname.replace(/\/+$/, "")}/`
+    const ingressPath = pathname.match(/^\/api\/hassio_ingress\/[^/]+/);
+    const basePath = ingressPath
+        ? `${ingressPath[0]}/`
         : pathname.endsWith("/")
             ? pathname
             : pathname.slice(0, pathname.lastIndexOf("/") + 1);
     return `${basePath}${path.replace(/^\/+/, "")}`;
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-    try {
-        const res = await fetch(apiUrl("api/auth/session"));
-        if (!res.ok) throw new Error(`Sitzung konnte nicht geladen werden (${res.status})`);
-        const session = await res.json();
-        authenticationDisabled = session.auth_disabled === true;
-
-        if (authenticationDisabled) {
-            token = "";
-            currentUser = session.username;
-            currentRole = session.role;
-            localStorage.removeItem("eisfach_token");
-            localStorage.removeItem("eisfach_user");
-            localStorage.removeItem("eisfach_role");
-            showApp();
-        } else if (token) {
-            showApp();
-        } else {
-            showLogin();
-        }
-    } catch (err) {
-        console.error(err);
+document.addEventListener("DOMContentLoaded", () => {
+    authenticationDisabled = /^\/api\/hassio_ingress\/[^/]+(?:\/|$)/.test(window.location.pathname);
+    if (authenticationDisabled) {
+        token = "";
+        currentUser = "Home Assistant";
+        currentRole = 1;
+        localStorage.removeItem("eisfach_token");
+        localStorage.removeItem("eisfach_user");
+        localStorage.removeItem("eisfach_role");
+        showApp();
+    } else if (token) {
+        showApp();
+    } else {
         showLogin();
-        const errDiv = document.getElementById("login-error");
-        errDiv.textContent = "Verbindung zum Server fehlgeschlagen";
-        errDiv.classList.remove("d-none");
     }
 
     document.getElementById("login-form").addEventListener("submit", async (e) => {
