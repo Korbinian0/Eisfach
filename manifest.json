@@ -3,7 +3,7 @@
   "name": "Eisfach",
   "documentation": "https://github.com/Korbinian0/Eisfach",
   "requirements": ["requests==2.32.3"],
-  "codeowners": [],
+  "codeowners": ["Korbinian Musch"],
   "iot_class": "local_polling",
   "version": "1.0.2"
 }
