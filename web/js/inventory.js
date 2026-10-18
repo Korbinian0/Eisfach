@@ -2,7 +2,7 @@ let inventory = [];
 
 async function loadInventory() {
     try {
-        const res = await fetch("/api/lager/", {
+        const res = await fetch(apiUrl("api/lager/"), {
             headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.status === 401) { logout(); return; }
@@ -51,7 +51,7 @@ function filterInventory() {
 
 async function actionEntnahme(id) {
     try {
-        const res = await fetch(`/api/lager/item/${id}/entnahme`, {
+        const res = await fetch(apiUrl(`api/lager/item/${id}/entnahme`), {
             method: "POST",
             headers: { "Authorization": `Bearer ${token}` }
         });
@@ -62,7 +62,7 @@ async function actionEntnahme(id) {
 
 async function actionWeiteres(id) {
     try {
-        const res = await fetch(`/api/lager/item/${id}/weiteres`, {
+        const res = await fetch(apiUrl(`api/lager/item/${id}/weiteres`), {
             method: "POST",
             headers: { "Authorization": `Bearer ${token}` }
         });

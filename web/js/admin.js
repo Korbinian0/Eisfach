@@ -2,7 +2,7 @@ let availableLocations = [];
 let users = [];
 async function loadLocations() {
     try {
-        const res = await fetch("/api/locations/", { headers: { "Authorization": `Bearer ${token}` } });
+        const res = await fetch(apiUrl("api/locations/"), { headers: { "Authorization": `Bearer ${token}` } });
         if (res.ok) { availableLocations = await res.json(); renderLocationsAdmin(availableLocations); }
     } catch (e) { console.error(e); }
 }
@@ -17,11 +17,11 @@ function renderLocationsAdmin(locs) {
 async function createLocation() {
     const name = document.getElementById("new-location-input").value.trim();
     if (!name) return;
-    await fetch("/api/locations/", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify({ name }) });
+    await fetch(apiUrl("api/locations/"), { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify({ name }) });
     loadLocations();
 }
 async function deleteLocation(id) {
-    await fetch(`/api/locations/${id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${token}` } });
+    await fetch(apiUrl(`api/locations/${id}`), { method: "DELETE", headers: { "Authorization": `Bearer ${token}` } });
     loadLocations();
 }
 function openCreateModal(barcode) {
@@ -39,7 +39,7 @@ function openCreateModal(barcode) {
 async function submitNewProduct(e, barcode) {
     e.preventDefault();
     const body = { barcode, name: document.getElementById("new-prod-name").value, lagerort: document.getElementById("new-prod-location").value, menge: parseInt(document.getElementById("new-prod-menge").value) };
-    const res = await fetch("/api/lager/create", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(body) });
+    const res = await fetch(apiUrl("api/lager/create"), { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(body) });
     if (!res.ok) { alert("Fehler"); return; }
     bootstrap.Modal.getInstance(document.getElementById("actionModal")).hide();
     bootstrap.Modal.getInstance(document.getElementById("scanModal")).hide();
@@ -58,7 +58,7 @@ function openLinkModal(barcode) {
 async function submitLinkProduct(e, newBarcode) {
     e.preventDefault();
     const body = { existing_id: document.getElementById("link-target-id").value, new_barcode: newBarcode, additional_menge: parseInt(document.getElementById("link-add-menge").value) };
-    const res = await fetch("/api/lager/link", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(body) });
+    const res = await fetch(apiUrl("api/lager/link"), { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(body) });
     if (!res.ok) { alert("Fehler"); return; }
     bootstrap.Modal.getInstance(document.getElementById("actionModal")).hide();
     bootstrap.Modal.getInstance(document.getElementById("scanModal")).hide();
@@ -83,14 +83,14 @@ function generateBarcodesForPrint() {
 async function registerUser(e) {
     e.preventDefault();
     const body = { username: document.getElementById("new-username").value.trim(), password: document.getElementById("new-password").value, role: parseInt(document.getElementById("new-role").value, 10) };
-    const res = await fetch("/api/auth/register", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(body) });
+    const res = await fetch(apiUrl("api/auth/register"), { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(body) });
     if (!res.ok) { alert(await getAdminError(res)); return; }
     document.getElementById("register-user-form").reset();
     await loadUsers();
 }
 
 async function loadUsers() {
-    const res = await fetch("/api/auth/users", { headers: { "Authorization": `****** } });
+    const res = await fetch(apiUrl("api/auth/users"), { headers: { "Authorization": `****** } });
     if (!res.ok) { alert(await getAdminError(res)); return; }
     users = await res.json();
     renderUsersAdmin();
@@ -143,7 +143,7 @@ async function updateUser(e) {
     };
     const password = document.getElementById("edit-password").value;
     if (password) body.password = password;
-    const res = await fetch(`/api/auth/users/${id}`, {
+    const res = await fetch(apiUrl(`api/auth/users/${id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json", "Authorization": `****** },
         body: JSON.stringify(body)
@@ -155,7 +155,7 @@ async function updateUser(e) {
 
 async function deleteUser(userId, username) {
     if (!confirm(`Benutzer "${username}" wirklich löschen?`)) return;
-    const res = await fetch(`/api/auth/users/${userId}`, {
+    const res = await fetch(apiUrl(`api/auth/users/${userId}`), {
         method: "DELETE",
         headers: { "Authorization": `****** }
     });

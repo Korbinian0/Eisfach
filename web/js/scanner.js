@@ -26,7 +26,7 @@ async function processBarcode() {
     resultArea.innerHTML = `<div class="spinner-border spinner-border-sm text-primary"></div> Prüfe Barcode...`;
 
     try {
-        const res = await fetch("/api/lager/scan", {
+        const res = await fetch(apiUrl("api/lager/scan"), {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
             body: JSON.stringify({ barcode })

@@ -24,7 +24,9 @@ Eisfach ist ein modernes, leichtgewichtigenes Lager- und Bestandsverwaltungssyst
 
 Melden Sie sich mit einem Admin-Konto an und öffnen Sie **Admin → Benutzerverwaltung**. Dort können Sie Konten erstellen, bearbeiten und löschen. Beim Bearbeiten ist ein leeres Passwortfeld gleichbedeutend damit, das bestehende Passwort beizubehalten. Die eigene Sitzung kann nicht gelöscht oder zum normalen Benutzer herabgestuft werden; außerdem muss mindestens ein Admin-Konto bestehen bleiben.
 
-Bei einer frischen Installation lautet der erste Login `admin` / `admin`. Ändern Sie dieses Standardpasswort in der Benutzerverwaltung, bevor Sie den Server anderen Geräten oder Netzwerken zugänglich machen.
+Bei einer frischen eigenständigen Serverinstallation lautet der erste Login `admin` / `admin`. Ändern Sie dieses Standardpasswort in der Benutzerverwaltung, bevor Sie den Server anderen Geräten oder Netzwerken zugänglich machen.
+
+Im Home-Assistant-Add-on wird die Eisfach-eigene Anmeldung deaktiviert. Die Weboberfläche und API sind nur über Home Assistant Ingress aufgerufen; die Add-on-Ports werden nicht direkt auf dem Host veröffentlicht. Der Zugriff wird durch die Home-Assistant-Anmeldung geschützt. Jeder Home-Assistant-Benutzer mit Zugriff auf dieses Ingress erhält in Eisfach Admin-Rechte. Bei einer eigenständigen Serverinstallation bleibt der Eisfach-Login aktiv.
 
 ---
 

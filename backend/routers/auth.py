@@ -5,9 +5,19 @@ from datetime import timedelta
 from database import get_db
 from models import User
 from schemas import Token, UserCreate, UserResponse, UserUpdate
-from auth import verify_password, get_password_hash, create_access_token, get_current_admin, ACCESS_TOKEN_EXPIRE_MINUTES
+from auth import AUTH_DISABLED, verify_password, get_password_hash, create_access_token, get_current_admin, ACCESS_TOKEN_EXPIRE_MINUTES
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
+
+@router.get("/session")
+def get_session(db: Session = Depends(get_db)):
+    if not AUTH_DISABLED:
+        return {"auth_disabled": False}
+
+    admin = db.query(User).filter(User.role == 1).order_by(User.id).first()
+    if admin is None:
+        raise HTTPException(status_code=503, detail="Kein Admin-Konto vorhanden")
+    return {"auth_disabled": True, "username": admin.username, "role": admin.role}
 
 @router.post("/login", response_model=Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):

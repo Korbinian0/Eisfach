@@ -1,12 +1,44 @@
 let token = localStorage.getItem("eisfach_token") || "";
 let currentUser = localStorage.getItem("eisfach_user") || "";
 let currentRole = parseInt(localStorage.getItem("eisfach_role") || "0");
+let authenticationDisabled = false;
 
-document.addEventListener("DOMContentLoaded", () => {
-    if (token) {
-        showApp();
-    } else {
+function apiUrl(path) {
+    const pathname = window.location.pathname;
+    const basePath = pathname.startsWith("/api/hassio_ingress/")
+        ? `${pathname.replace(/\/+$/, "")}/`
+        : pathname.endsWith("/")
+            ? pathname
+            : pathname.slice(0, pathname.lastIndexOf("/") + 1);
+    return `${basePath}${path.replace(/^\/+/, "")}`;
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const res = await fetch(apiUrl("api/auth/session"));
+        if (!res.ok) throw new Error(`Sitzung konnte nicht geladen werden (${res.status})`);
+        const session = await res.json();
+        authenticationDisabled = session.auth_disabled === true;
+
+        if (authenticationDisabled) {
+            token = "";
+            currentUser = session.username;
+            currentRole = session.role;
+            localStorage.removeItem("eisfach_token");
+            localStorage.removeItem("eisfach_user");
+            localStorage.removeItem("eisfach_role");
+            showApp();
+        } else if (token) {
+            showApp();
+        } else {
+            showLogin();
+        }
+    } catch (err) {
+        console.error(err);
         showLogin();
+        const errDiv = document.getElementById("login-error");
+        errDiv.textContent = "Verbindung zum Server fehlgeschlagen";
+        errDiv.classList.remove("d-none");
     }
 
     document.getElementById("login-form").addEventListener("submit", async (e) => {
@@ -21,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.append("password", password);
 
         try {
-            const res = await fetch("/api/auth/login", {
+            const res = await fetch(apiUrl("api/auth/login"), {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: formData
@@ -53,12 +85,16 @@ function showApp() {
     document.getElementById("user-display").textContent = `Eingeloggt: ${currentUser} (${currentRole === 1 ? 'Admin' : 'User'})`;
     if (currentRole === 1) {
         document.getElementById("admin-tab-btn").classList.remove("d-none");
+    } else {
+        document.getElementById("admin-tab-btn").classList.add("d-none");
     }
+    document.getElementById("logout-button").classList.toggle("d-none", authenticationDisabled);
     loadInventory();
     loadLocations();
 }
 
 function logout() {
+    if (authenticationDisabled) return;
     localStorage.clear();
     token = "";
     currentUser = "";
