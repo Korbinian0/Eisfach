@@ -96,6 +96,8 @@ sudo systemctl start eisfach
 
    Port 8001 ist ausschließlich für den internen Home-Assistant-Ingress bestimmt und wird nicht direkt auf dem Host veröffentlicht. Rufen Sie ihn nicht direkt über die Server-IP auf.
 
+Die Add-on-Datenbank wird unter `/config/eisfach/eisfach.db` gespeichert. Das Startskript übernimmt beim Start eine noch vorhandene alte Datenbank aus dem Container-Pfad `/app/backend/eisfach.db`, falls die persistente Datenbank leer ist. Wenn die alte Container-Datenbank beim Add-on-Update bereits entfernt wurde und keine Home-Assistant-Sicherung existiert, kann das Add-on die darin enthaltenen Daten nicht wiederherstellen.
+
 ### Sensor Integration (via HACS / GitHub)
 1. Fügen Sie dieses Repository (`https://github.com/Korbinian0/Eisfach`) in **HACS** als benutzerdefiniertes Repository (Kategorie: *Integration*) hinzu oder kopieren Sie den Ordner `homeassistant/custom_components/eisfach` nach `/config/custom_components/eisfach`.
 2. Starten Sie Home Assistant neu.

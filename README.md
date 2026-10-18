@@ -28,6 +28,8 @@ Bei einer frischen eigenständigen Serverinstallation lautet der erste Login `ad
 
 Im Home-Assistant-Add-on gibt es zwei Zugänge: Port **8000** ist die normale Weboberfläche mit Eisfach-Login und wird direkt auf Host-Port 8000 veröffentlicht. Port **8001** ist nicht als Host-Port veröffentlicht und dient Home Assistant Ingress. Über Ingress erfolgt der Login automatisch; jeder Home-Assistant-Benutzer mit Zugriff auf dieses Ingress erhält in Eisfach Admin-Rechte. Bei einer eigenständigen Serverinstallation bleibt der Eisfach-Login aktiv.
 
+Im Home-Assistant-Add-on wird die SQLite-Datenbank dauerhaft unter `/config/eisfach/eisfach.db` gespeichert. Beim Update versucht das Startskript, eine noch vorhandene Datenbank aus dem früheren Container-Pfad zu übernehmen, wenn die persistente Datenbank noch leer ist.
+
 ---
 
 ## 📂 Projektstruktur
